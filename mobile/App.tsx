@@ -1,12 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button, TamaguiProvider, Theme } from 'tamagui';
 import tamaguiConfig from './tamagui.config';
+import { apiBaseUrl } from './src/lib/api';
+import { useAuthStore } from './src/stores/auth-store';
 
 const queryClient = new QueryClient();
-const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
 
 const roleActions = [
   { label: 'Create match', icon: 'add-circle-outline' as const, tone: '#0f766e' },
@@ -21,6 +23,21 @@ const matchRows = [
 ];
 
 export default function App() {
+  const [phone, setPhone] = useState('+918310827940');
+  const [otp, setOtp] = useState('');
+  const [authStep, setAuthStep] = useState<'phone' | 'otp'>('phone');
+  const [authMessage, setAuthMessage] = useState('Use your Firebase test phone number for local sign-in.');
+  const { user, clearSession } = useAuthStore();
+
+  const handleSendOtp = () => {
+    setAuthStep('otp');
+    setAuthMessage('OTP entry is ready. Firebase verifier wiring will be tested on device.');
+  };
+
+  const handleVerifyOtp = () => {
+    setAuthMessage('Backend /me exchange will run after Firebase returns a real ID token.');
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <TamaguiProvider config={tamaguiConfig as any} defaultTheme="light">
@@ -58,20 +75,58 @@ export default function App() {
               </View>
 
               <View style={styles.loginPanel}>
-                <Text style={styles.sectionTitle}>Sign in with phone</Text>
-                <Text style={styles.helpText}>Only admin-approved phone numbers can score or manage matches.</Text>
-                <View style={styles.inputWrap}>
-                  <Ionicons name="call-outline" size={20} color="#64748b" />
-                  <TextInput
-                    style={styles.input}
-                    placeholder="+91 98765 43210"
-                    placeholderTextColor="#94a3b8"
-                    keyboardType="phone-pad"
-                  />
-                </View>
-                <Button theme="green" size="$4" borderRadius="$3">
-                  Send OTP
-                </Button>
+                {user ? (
+                  <>
+                    <Text style={styles.sectionTitle}>Signed in</Text>
+                    <Text style={styles.helpText}>
+                      {user.name ?? user.phone} is active as {user.role.replaceAll('_', ' ').toLowerCase()}.
+                    </Text>
+                    <Button theme="red" size="$4" borderRadius="$3" onPress={clearSession}>
+                      Sign out
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Text style={styles.sectionTitle}>Sign in with phone</Text>
+                    <Text style={styles.helpText}>
+                      Only admin-approved phone numbers can score or manage matches.
+                    </Text>
+                    <View style={styles.inputWrap}>
+                      <Ionicons name="call-outline" size={20} color="#64748b" />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="+91 98765 43210"
+                        placeholderTextColor="#94a3b8"
+                        keyboardType="phone-pad"
+                        onChangeText={setPhone}
+                        value={phone}
+                      />
+                    </View>
+                    {authStep === 'otp' ? (
+                      <View style={styles.inputWrap}>
+                        <Ionicons name="keypad-outline" size={20} color="#64748b" />
+                        <TextInput
+                          style={styles.input}
+                          placeholder="123456"
+                          placeholderTextColor="#94a3b8"
+                          keyboardType="number-pad"
+                          maxLength={6}
+                          onChangeText={setOtp}
+                          value={otp}
+                        />
+                      </View>
+                    ) : null}
+                    <Text style={styles.authMessage}>{authMessage}</Text>
+                    <Button
+                      theme="green"
+                      size="$4"
+                      borderRadius="$3"
+                      onPress={authStep === 'phone' ? handleSendOtp : handleVerifyOtp}
+                    >
+                      {authStep === 'phone' ? 'Send OTP' : 'Verify OTP'}
+                    </Button>
+                  </>
+                )}
               </View>
 
               <View style={styles.actions}>
@@ -223,6 +278,11 @@ const styles = StyleSheet.create({
     color: '#64748b',
     fontSize: 14,
     lineHeight: 20,
+  },
+  authMessage: {
+    color: '#475569',
+    fontSize: 13,
+    lineHeight: 18,
   },
   inputWrap: {
     alignItems: 'center',
