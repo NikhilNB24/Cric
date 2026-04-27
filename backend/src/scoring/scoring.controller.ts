@@ -33,6 +33,7 @@ type SubmitBallBody = {
   isWicket?: unknown;
   dismissalType?: unknown;
   playerOutId?: unknown;
+  fielderId?: unknown;
   notes?: unknown;
   idempotencyKey?: unknown;
 };
@@ -85,6 +86,7 @@ export class ScoringController {
       isWicket: body.isWicket === true,
       dismissalType: this.parseOptionalDismissalType(body.dismissalType),
       playerOutId: this.parseOptionalString(body.playerOutId, 'playerOutId'),
+      fielderId: this.parseOptionalString(body.fielderId, 'fielderId'),
       notes: this.parseOptionalString(body.notes, 'notes'),
       idempotencyKey: this.parseRequiredString(
         body.idempotencyKey,

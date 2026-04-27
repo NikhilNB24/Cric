@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Text, TextInput, View } from 'react-native';
-import { Button } from 'tamagui';
+import { AppButton } from './AppButton';
 import { styles } from './styles';
 
 export type AuthPanelProps = {
@@ -30,9 +30,9 @@ export function AuthPanel(props: AuthPanelProps) {
           </View>
           <Ionicons name="checkmark-circle-outline" size={26} color="#0f766e" />
         </View>
-        <Button theme="red" size="$4" borderRadius="$3" onPress={props.clearSession}>
+        <AppButton tone="danger" onPress={props.clearSession}>
           Sign out
-        </Button>
+        </AppButton>
       </View>
     );
   }
@@ -69,14 +69,9 @@ export function AuthPanel(props: AuthPanelProps) {
         </View>
       ) : null}
       <Text style={styles.authMessage}>{props.authMessage}</Text>
-      <Button
-        borderRadius="$3"
-        onPress={props.authStep === 'phone' ? props.handleSendOtp : props.handleVerifyOtp}
-        size="$4"
-        theme="green"
-      >
+      <AppButton onPress={props.authStep === 'phone' ? props.handleSendOtp : props.handleVerifyOtp}>
         {props.authStep === 'phone' ? 'Send OTP' : 'Verify OTP'}
-      </Button>
+      </AppButton>
     </View>
   );
 }

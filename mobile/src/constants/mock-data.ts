@@ -2,10 +2,12 @@ import type { ComponentProps } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 
 export type IconName = ComponentProps<typeof Ionicons>['name'];
-export type TabKey = 'viewer' | 'scorer' | 'admin';
+export type TabKey = 'profile' | 'matches' | 'stats' | 'scorer' | 'admin';
 
 export const tabs: Array<{ key: TabKey; label: string; icon: IconName }> = [
-  { key: 'viewer', label: 'Live', icon: 'pulse-outline' },
+  { key: 'profile', label: 'Profile', icon: 'person-circle-outline' },
+  { key: 'matches', label: 'Matches', icon: 'pulse-outline' },
+  { key: 'stats', label: 'Stats', icon: 'stats-chart-outline' },
   { key: 'scorer', label: 'Score', icon: 'radio-button-on-outline' },
   { key: 'admin', label: 'Admin', icon: 'settings-outline' },
 ];

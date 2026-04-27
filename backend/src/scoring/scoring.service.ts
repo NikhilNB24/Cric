@@ -32,6 +32,7 @@ type SubmitBallInput = {
   isWicket: boolean;
   dismissalType?: DismissalType;
   playerOutId?: string | null;
+  fielderId?: string | null;
   notes?: string | null;
   idempotencyKey: string;
 };
@@ -63,6 +64,7 @@ export class ScoringService {
                 striker: true,
                 nonStriker: true,
                 bowler: true,
+                fielder: true,
                 playerOut: true,
               },
             },
@@ -193,6 +195,7 @@ export class ScoringService {
             isWicket: input.isWicket,
             dismissalType: input.dismissalType,
             playerOutId: input.playerOutId,
+            fielderId: input.fielderId,
             notes: input.notes,
             idempotencyKey: input.idempotencyKey,
           },
@@ -381,6 +384,14 @@ export class ScoringService {
     if (input.isWicket && !input.dismissalType) {
       throw new BadRequestException('dismissalType is required for wickets.');
     }
+
+    if (input.dismissalType === DismissalType.CAUGHT && !input.fielderId) {
+      throw new BadRequestException('fielderId is required for caught wickets.');
+    }
+
+    if (!input.isWicket && input.fielderId) {
+      throw new BadRequestException('fielderId can only be used for wickets.');
+    }
   }
 
   private async validateBallPlayers(
@@ -402,6 +413,7 @@ export class ScoringService {
       input.nonStrikerId,
       input.bowlerId,
       input.playerOutId,
+      input.fielderId,
     ].filter((id): id is string => Boolean(id));
     const players = await tx.player.findMany({
       where: {
@@ -442,6 +454,13 @@ export class ScoringService {
       throw new BadRequestException(
         'Dismissed player must belong to the batting team.',
       );
+    }
+
+    if (
+      input.fielderId &&
+      playerById.get(input.fielderId)?.teamId !== innings.bowlingTeamId
+    ) {
+      throw new BadRequestException('Fielder must belong to the bowling team.');
     }
   }
 

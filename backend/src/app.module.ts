@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { FirebaseModule } from './firebase/firebase.module';
 import { MatchesModule } from './matches/matches.module';
+import { PlayerStatsModule } from './player-stats/player-stats.module';
 import { ScoringModule } from './scoring/scoring.module';
 import { TournamentsModule } from './tournaments/tournaments.module';
 import { UsersModule } from './users/users.module';
@@ -23,6 +24,7 @@ import { ViewerModule } from './viewer/viewer.module';
     TournamentsModule,
     MatchesModule,
     ScoringModule,
+    PlayerStatsModule,
     ViewerModule,
   ],
   controllers: [AppController],

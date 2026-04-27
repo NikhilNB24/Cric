@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
-import { Button } from 'tamagui';
 import { adminStats, type IconName } from '../constants/mock-data';
 import {
   createMatch,
@@ -14,6 +13,8 @@ import {
   listUsers,
 } from '../lib/api';
 import { useAuthStore } from '../stores/auth-store';
+import { AppButton } from './AppButton';
+import { NumberSelector } from './NumberSelector';
 import { styles } from './styles';
 
 export function AdminTab() {
@@ -24,8 +25,9 @@ export function AdminTab() {
   const [tournamentName, setTournamentName] = useState('');
   const [teamName, setTeamName] = useState('');
   const [teamShortName, setTeamShortName] = useState('');
+  const [teamPlayerCount, setTeamPlayerCount] = useState(11);
   const [playerName, setPlayerName] = useState('');
-  const [matchOvers, setMatchOvers] = useState('15');
+  const [matchOvers, setMatchOvers] = useState(15);
   const [message, setMessage] = useState('Sign in as an admin to manage setup data.');
   const setupIds = {
     tournamentId: process.env.EXPO_PUBLIC_DEMO_TOURNAMENT_ID,
@@ -77,7 +79,7 @@ export function AdminTab() {
         shortName: teamShortName.trim() || null,
       }),
     onSuccess: async () => {
-      setMessage('Team created.');
+      setMessage(`Team created. Add ${teamPlayerCount} players before creating a match.`);
       setTeamName('');
       setTeamShortName('');
       await queryClient.invalidateQueries({ queryKey: ['admin', 'tournaments'] });
@@ -102,7 +104,7 @@ export function AdminTab() {
         tournamentId: setupIds.tournamentId ?? '',
         homeTeamId: setupIds.homeTeamId ?? '',
         awayTeamId: setupIds.awayTeamId ?? '',
-        overs: Number(matchOvers),
+        overs: matchOvers,
       }),
     onSuccess: async () => {
       setMessage('Match created.');
@@ -177,14 +179,12 @@ export function AdminTab() {
             value={userName}
           />
         </View>
-        <Button
-          borderRadius="$3"
+        <AppButton
           disabled={!idToken || createUserMutation.isPending}
           onPress={() => createUserMutation.mutate()}
-          theme="green"
         >
           Approve viewer
-        </Button>
+        </AppButton>
       </View>
 
       <View style={styles.panel}>
@@ -200,14 +200,12 @@ export function AdminTab() {
             value={tournamentName}
           />
         </View>
-        <Button
-          borderRadius="$3"
+        <AppButton
           disabled={!idToken || createTournamentMutation.isPending}
           onPress={() => createTournamentMutation.mutate()}
-          theme="green"
         >
           Create tournament
-        </Button>
+        </AppButton>
         <Text style={styles.authMessage}>{message}</Text>
       </View>
 
@@ -237,14 +235,21 @@ export function AdminTab() {
             value={teamShortName}
           />
         </View>
-        <Button
-          borderRadius="$3"
+        <NumberSelector
+          helperText="Roster target for this team"
+          label="Players in team"
+          max={11}
+          min={4}
+          onChange={setTeamPlayerCount}
+          unit="players"
+          value={teamPlayerCount}
+        />
+        <AppButton
           disabled={!idToken || !setupIds.tournamentId || createTeamMutation.isPending}
           onPress={() => createTeamMutation.mutate()}
-          theme="green"
         >
           Add team
-        </Button>
+        </AppButton>
       </View>
 
       <View style={styles.panel}>
@@ -262,14 +267,12 @@ export function AdminTab() {
             value={playerName}
           />
         </View>
-        <Button
-          borderRadius="$3"
+        <AppButton
           disabled={!idToken || !setupIds.teamId || createPlayerMutation.isPending}
           onPress={() => createPlayerMutation.mutate()}
-          theme="green"
         >
           Add player
-        </Button>
+        </AppButton>
       </View>
 
       <View style={styles.panel}>
@@ -277,19 +280,16 @@ export function AdminTab() {
         <Text style={styles.helpText}>
           Uses demo tournament and team IDs until match setup selection is built.
         </Text>
-        <View style={styles.inputWrap}>
-          <Ionicons name="time-outline" size={20} color="#64748b" />
-          <TextInput
-            keyboardType="number-pad"
-            onChangeText={setMatchOvers}
-            placeholder="15"
-            placeholderTextColor="#94a3b8"
-            style={styles.input}
-            value={matchOvers}
-          />
-        </View>
-        <Button
-          borderRadius="$3"
+        <NumberSelector
+          helperText="Allowed range is 3 to 15"
+          label="Match overs"
+          max={15}
+          min={3}
+          onChange={setMatchOvers}
+          unit="overs"
+          value={matchOvers}
+        />
+        <AppButton
           disabled={
             !idToken ||
             !setupIds.tournamentId ||
@@ -298,10 +298,9 @@ export function AdminTab() {
             createMatchMutation.isPending
           }
           onPress={() => createMatchMutation.mutate()}
-          theme="green"
         >
           Create match
-        </Button>
+        </AppButton>
       </View>
     </View>
   );

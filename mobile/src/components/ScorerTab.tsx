@@ -2,10 +2,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMutation } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { Button } from 'tamagui';
 import { scorerBalls } from '../constants/mock-data';
 import { submitBall, undoLastBall, type SubmitBallPayload } from '../lib/api';
 import { useAuthStore } from '../stores/auth-store';
+import { AppButton } from './AppButton';
 import { styles } from './styles';
 
 export function ScorerTab() {
@@ -85,22 +85,19 @@ export function ScorerTab() {
         </View>
         <Text style={styles.authMessage}>{message}</Text>
         <View style={styles.scorerActions}>
-          <Button
-            borderRadius="$3"
+          <AppButton
             disabled={!hasScoringContext || submitMutation.isPending}
             onPress={() => submitMutation.mutate()}
-            theme="green"
           >
             Submit ball
-          </Button>
-          <Button
-            borderRadius="$3"
+          </AppButton>
+          <AppButton
             disabled={!hasScoringContext || undoMutation.isPending}
             onPress={() => undoMutation.mutate()}
-            theme="yellow"
+            tone="warning"
           >
             Undo last ball
-          </Button>
+          </AppButton>
         </View>
       </View>
     </View>

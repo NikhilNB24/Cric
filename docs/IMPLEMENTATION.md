@@ -125,3 +125,63 @@ Why:
 - Admin wiring is the next-lowest-risk write path because user approval and tournament creation are simple, isolated setup actions.
 - Team/player/match creation now exists in the UI without requiring full picker screens, which keeps API wiring moving while preserving a clear path to replace demo IDs.
 - Scorer wiring starts behind explicit demo IDs so the UI can be exercised without pretending match/player selection is finished.
+
+### Local Developer Command
+
+- Added a root `npm.cmd run dev` command that starts the backend and Expo mobile dev server together.
+- Added `scripts/dev.ps1` to launch backend and mobile from one IDE terminal.
+- Added the missing `babel-preset-expo` mobile dev dependency required by `mobile/babel.config.js`.
+- Imported `UsersModule` into tournament, match, scoring, and viewer backend modules so their local `FirebaseAuthGuard` providers can resolve `UsersService`.
+- Updated `scripts/dev.ps1` to run backend and mobile as background jobs with prefixed logs in the same IDE terminal.
+- Redirected backend and Expo stderr into the same prefixed terminal log stream so warnings do not stop the combined dev command.
+- Added `npm.cmd run dev:web` to start backend plus Expo web on `http://localhost:19006` without needing the interactive Expo `w` shortcut.
+- Added Expo web runtime dependencies `react-dom` and `react-native-web` so the mobile app can run in a laptop browser.
+- Added the missing `@tamagui/native` package required by Tamagui's web bundle path.
+- Ignored generated `.tamagui/` cache output.
+- Updated the web dev command to clear Metro cache on startup.
+- Ignored the temporary `.expo-web-test/` export verification output.
+- Filtered Expo web bundle progress repaint lines from the combined dev terminal output.
+- Replaced Tamagui runtime buttons with a small React Native `AppButton` component.
+- Removed the Tamagui provider from `App.tsx`.
+- Removed unused Tamagui dependencies, Babel plugin configuration, and Tamagui config file.
+- Simplified the mobile home screen so match stats, scoring, and admin tabs are shown only after sign-in.
+- Added player career stats storage with per-match stat rows and aggregate career stat rows.
+- Added `POST /player-stats/matches/:id/recalculate` for scorer/admin-driven career stat updates after a completed match.
+- Added `GET /player-stats/players/:id` and `GET /player-stats/leaderboard` read endpoints.
+- Added optional `fielderId` on scored ball events for caught dismissals.
+- Updated career stat recalculation to credit catches to the recorded fielder, or to the bowler for caught-and-bowled dismissals.
+- Added a reusable mobile `NumberSelector` for constrained numeric setup fields.
+- Replaced match overs text entry with a plus/minus selector.
+- Added a players-in-team selector to guide team roster setup.
+- Added a local development OTP bypass that accepts any entered OTP and signs in with a `dev-local:<phone>` token.
+- Added backend support for `dev-local:<phone>` bearer tokens outside production by resolving the phone number against active local users.
+- Expanded local CORS support to include Expo web at `http://localhost:19006`.
+- Replaced the signed-in tab strip with a hamburger menu for Profile, Matches, Stats, Score, and Admin.
+- Added a mobile Stats screen that searches players by name or phone number and displays selected career stats.
+- Added `GET /player-stats/players?query=...` for player stat lookup.
+
+Why:
+
+- A single command reduces local startup friction and keeps backend/mobile startup paths consistent across development sessions.
+- Explicitly installing the Expo Babel preset prevents Android bundling from failing when Metro loads the project Babel config.
+- Nest resolves guard dependencies from the module where the guard is provided, so each guarded feature module needs visibility into the exported user lookup service.
+- Keeping both dev server logs in one terminal makes startup failures easier to see and avoids extra PowerShell windows while working inside the IDE.
+- Expo compatibility warnings should be visible to the developer, but they should not be treated as fatal PowerShell job errors.
+- The combined terminal log mode cannot pass keypresses into Expo, so a direct web command gives laptop testing a reliable non-interactive path.
+- Expo requires the web renderer packages before `expo start --web` can serve the app locally.
+- Tamagui's main package imports its native bridge during web bundling, so the matching package must be installed with the rest of the Tamagui family.
+- Generated Tamagui cache files should stay out of source control because they are rebuilt locally.
+- Clearing Metro cache avoids stale failed web bundles after dependency fixes.
+- The one-shot web export output is only a local verification artifact.
+- Expo's progress bar uses terminal repaint characters that render poorly through PowerShell background jobs, while the actual warnings and errors remain useful.
+- The current UI only needs simple buttons, and removing Tamagui from the render path avoids duplicate package instance crashes during Expo web testing.
+- Removing unused Tamagui tooling keeps Metro from loading stale plugin/config paths and reduces the web bundle size.
+- The first screen should stay focused on authentication before exposing role-specific match workflows.
+- Per-match stat rows make career stat recalculation idempotent and correction-friendly because a match can be recalculated without double-counting.
+- Career stat reads give the app a stable API target for player profiles and leaderboards.
+- Capturing `fielderId` at scoring time gives the backend enough data to calculate fielding career stats from the ball-event ledger.
+- Numeric match and roster setup values should be selected from valid ranges instead of typed freely.
+- Local browser/device testing should not be blocked on Firebase verifier setup while core workflows are still being built.
+- The bypass still requires the phone number to exist as an active backend user and is disabled when `NODE_ENV=production`.
+- Expo web runs from a different localhost origin than Metro native, so the backend must allow both local origins.
+- Player stats should be discoverable by users without knowing internal player IDs.

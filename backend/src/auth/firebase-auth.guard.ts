@@ -24,6 +24,10 @@ export class FirebaseAuthGuard implements CanActivate {
       throw new UnauthorizedException('Missing bearer token.');
     }
 
+    if (token.startsWith('dev-local:')) {
+      return await this.activateLocalDevUser(request, token);
+    }
+
     const decodedToken = await this.verifyToken(token);
     const phone = decodedToken.phone_number;
 
@@ -65,5 +69,26 @@ export class FirebaseAuthGuard implements CanActivate {
     } catch {
       throw new UnauthorizedException('Invalid Firebase token.');
     }
+  }
+
+  private async activateLocalDevUser(request: Request, token: string) {
+    if (process.env.NODE_ENV === 'production') {
+      throw new UnauthorizedException('Local dev tokens are disabled.');
+    }
+
+    const phone = token.replace('dev-local:', '').trim();
+
+    if (!phone) {
+      throw new UnauthorizedException('Local dev token is missing a phone number.');
+    }
+
+    const user = await this.usersService.findActiveByPhone(phone);
+
+    if (!user) {
+      throw new UnauthorizedException('Phone number is not active in CRIC.');
+    }
+
+    (request as Request & { user: AuthenticatedUser }).user = user;
+    return true;
   }
 }

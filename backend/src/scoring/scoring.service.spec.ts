@@ -54,6 +54,17 @@ describe('ScoringService', () => {
       ).rejects.toThrow('dismissalType is required for wickets.');
     });
 
+    it('requires a fielder when dismissal type is caught', async () => {
+      await expect(
+        service.submitBall({
+          ...validBallInput,
+          isWicket: true,
+          dismissalType: DismissalType.CAUGHT,
+          playerOutId: 'striker-1',
+        }),
+      ).rejects.toThrow('fielderId is required for caught wickets.');
+    });
+
     it('allows a wicket when dismissal type is provided', async () => {
       const transaction = jest.fn();
       service = new ScoringService({ $transaction: transaction } as never);

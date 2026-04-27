@@ -1,0 +1,9 @@
+{
+  "name": "cric",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "powershell -ExecutionPolicy Bypass -File ./scripts/dev.ps1",
+    "dev:web": "powershell -ExecutionPolicy Bypass -File ./scripts/dev.ps1 -Web -FrontendPort 19006"
+  }
+}

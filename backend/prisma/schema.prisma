@@ -112,7 +112,10 @@ model Player {
   strikerEvents    BallEvent[] @relation("BallEventStriker")
   nonStrikerEvents BallEvent[] @relation("BallEventNonStriker")
   bowlerEvents     BallEvent[] @relation("BallEventBowler")
+  fielderEvents    BallEvent[] @relation("BallEventFielder")
   outEvents        BallEvent[] @relation("BallEventPlayerOut")
+  matchStats       MatchPlayerStat[]
+  careerStat       PlayerCareerStat?
 
   @@unique([teamId, name])
   @@map("players")
@@ -137,6 +140,7 @@ model Match {
   awayTeam      Team                @relation("AwayTeam", fields: [awayTeamId], references: [id])
   innings       Innings[]
   scoreSnapshot MatchScoreSnapshot?
+  playerStats   MatchPlayerStat[]
 
   @@map("matches")
 }
@@ -175,6 +179,7 @@ model BallEvent {
   strikerId       String
   nonStrikerId    String
   bowlerId        String
+  fielderId       String?
   scoredById      String
   runsBat         Int            @default(0)
   wides           Int            @default(0)
@@ -194,6 +199,7 @@ model BallEvent {
   striker    Player  @relation("BallEventStriker", fields: [strikerId], references: [id])
   nonStriker Player  @relation("BallEventNonStriker", fields: [nonStrikerId], references: [id])
   bowler     Player  @relation("BallEventBowler", fields: [bowlerId], references: [id])
+  fielder    Player? @relation("BallEventFielder", fields: [fielderId], references: [id])
   scoredBy   User    @relation("BallEventScorer", fields: [scoredById], references: [id])
   playerOut  Player? @relation("BallEventPlayerOut", fields: [playerOutId], references: [id])
 
@@ -212,4 +218,53 @@ model MatchScoreSnapshot {
   match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
   @@map("match_score_snapshots")
+}
+
+model MatchPlayerStat {
+  id             String   @id @default(uuid())
+  matchId        String
+  playerId       String
+  matches        Int      @default(1)
+  battingInnings Int      @default(0)
+  bowlingInnings Int      @default(0)
+  runs           Int      @default(0)
+  ballsFaced     Int      @default(0)
+  fours          Int      @default(0)
+  sixes          Int      @default(0)
+  outs           Int      @default(0)
+  wickets        Int      @default(0)
+  ballsBowled    Int      @default(0)
+  runsConceded   Int      @default(0)
+  catches        Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  match  Match  @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([matchId, playerId])
+  @@map("match_player_stats")
+}
+
+model PlayerCareerStat {
+  id             String   @id @default(uuid())
+  playerId       String   @unique
+  matches        Int      @default(0)
+  battingInnings Int      @default(0)
+  bowlingInnings Int      @default(0)
+  runs           Int      @default(0)
+  ballsFaced     Int      @default(0)
+  fours          Int      @default(0)
+  sixes          Int      @default(0)
+  outs           Int      @default(0)
+  highestScore   Int      @default(0)
+  wickets        Int      @default(0)
+  ballsBowled    Int      @default(0)
+  runsConceded   Int      @default(0)
+  catches        Int      @default(0)
+  updatedAt      DateTime @updatedAt
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@map("player_career_stats")
 }

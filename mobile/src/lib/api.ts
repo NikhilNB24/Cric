@@ -83,6 +83,39 @@ export type CreateMatchPayload = {
   scheduledAt?: string | null;
 };
 
+export type PlayerCareerStat = {
+  id: string | null;
+  playerId: string;
+  matches: number;
+  battingInnings: number;
+  bowlingInnings: number;
+  runs: number;
+  ballsFaced: number;
+  fours: number;
+  sixes: number;
+  outs: number;
+  highestScore: number;
+  wickets: number;
+  ballsBowled: number;
+  runsConceded: number;
+  catches: number;
+  updatedAt: string | null;
+};
+
+export type PlayerWithStats = {
+  id: string;
+  teamId: string;
+  name: string;
+  phone: string | null;
+  team: TeamSummary;
+  careerStat: PlayerCareerStat | null;
+};
+
+export type PlayerStatsResponse = {
+  player: PlayerWithStats;
+  careerStat: PlayerCareerStat;
+};
+
 export type StartInningsPayload = {
   battingTeamId: string;
   bowlingTeamId: string;
@@ -101,6 +134,7 @@ export type SubmitBallPayload = {
   isWicket?: boolean;
   dismissalType?: string;
   playerOutId?: string | null;
+  fielderId?: string | null;
   notes?: string | null;
   idempotencyKey: string;
 };
@@ -214,6 +248,17 @@ export function startInnings(idToken: string, matchId: string, body: StartInning
     method: 'POST',
     body,
   });
+}
+
+export function searchPlayerStats(idToken: string, query: string) {
+  return apiRequest<PlayerWithStats[]>(
+    `/player-stats/players?query=${encodeURIComponent(query)}&limit=10`,
+    { idToken },
+  );
+}
+
+export function getPlayerStats(idToken: string, playerId: string) {
+  return apiRequest<PlayerStatsResponse>(`/player-stats/players/${playerId}`, { idToken });
 }
 
 export function submitBall(idToken: string, inningsId: string, body: SubmitBallPayload) {
