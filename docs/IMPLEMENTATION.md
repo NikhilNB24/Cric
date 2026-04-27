@@ -88,3 +88,19 @@ Why:
 - MVP viewers only need fresh data when opening or manually refreshing a screen, so snapshot-based reads keep the backend simple and cheap.
 - Separating viewer endpoints from scorer/admin setup endpoints makes it easier to keep payloads small and permissions clear.
 - The compact live-score endpoint gives mobile a stable target before automatic live updates are introduced.
+
+### Mobile App Shell
+
+- Reworked the mobile home screen into a three-tab app shell: Live, Score, and Admin.
+- Added a live-match viewer preview that mirrors the viewer refresh APIs.
+- Added scorer-focused innings, player, ball input, submit, and undo surfaces.
+- Added admin setup previews for tournaments, teams, matches, and user approval.
+- Kept Firebase phone sign-in visible above the workflow tabs.
+- Split the app shell into ES module components, constants, and shared styles instead of keeping all UI code in `App.tsx`.
+
+Why:
+
+- The backend API surface is broad enough to begin shaping the mobile workflows around real product tasks.
+- The tab shell gives each role a clear area without introducing navigation complexity before API wiring is complete.
+- Mocked data lets us verify layout, information density, and control placement before binding screens to live backend data.
+- Smaller components make the UI easier to wire to APIs, test, and evolve screen-by-screen.
