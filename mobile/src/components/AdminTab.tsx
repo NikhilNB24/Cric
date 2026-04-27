@@ -4,7 +4,15 @@ import { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import { Button } from 'tamagui';
 import { adminStats, type IconName } from '../constants/mock-data';
-import { createTournament, createUser, listTournaments, listUsers } from '../lib/api';
+import {
+  createMatch,
+  createPlayer,
+  createTeam,
+  createTournament,
+  createUser,
+  listTournaments,
+  listUsers,
+} from '../lib/api';
 import { useAuthStore } from '../stores/auth-store';
 import { styles } from './styles';
 
@@ -14,7 +22,17 @@ export function AdminTab() {
   const [userPhone, setUserPhone] = useState('+91');
   const [userName, setUserName] = useState('');
   const [tournamentName, setTournamentName] = useState('');
+  const [teamName, setTeamName] = useState('');
+  const [teamShortName, setTeamShortName] = useState('');
+  const [playerName, setPlayerName] = useState('');
+  const [matchOvers, setMatchOvers] = useState('15');
   const [message, setMessage] = useState('Sign in as an admin to manage setup data.');
+  const setupIds = {
+    tournamentId: process.env.EXPO_PUBLIC_DEMO_TOURNAMENT_ID,
+    teamId: process.env.EXPO_PUBLIC_DEMO_TEAM_ID,
+    homeTeamId: process.env.EXPO_PUBLIC_DEMO_HOME_TEAM_ID,
+    awayTeamId: process.env.EXPO_PUBLIC_DEMO_AWAY_TEAM_ID,
+  };
   const usersQuery = useQuery({
     queryKey: ['admin', 'users'],
     queryFn: () => listUsers(idToken ?? ''),
@@ -48,6 +66,46 @@ export function AdminTab() {
     onSuccess: async () => {
       setMessage('Tournament created.');
       setTournamentName('');
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'tournaments'] });
+    },
+    onError: (error) => setMessage(error.message),
+  });
+  const createTeamMutation = useMutation({
+    mutationFn: () =>
+      createTeam(idToken ?? '', setupIds.tournamentId ?? '', {
+        name: teamName.trim(),
+        shortName: teamShortName.trim() || null,
+      }),
+    onSuccess: async () => {
+      setMessage('Team created.');
+      setTeamName('');
+      setTeamShortName('');
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'tournaments'] });
+    },
+    onError: (error) => setMessage(error.message),
+  });
+  const createPlayerMutation = useMutation({
+    mutationFn: () =>
+      createPlayer(idToken ?? '', setupIds.teamId ?? '', {
+        name: playerName.trim(),
+      }),
+    onSuccess: async () => {
+      setMessage('Player added.');
+      setPlayerName('');
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'tournaments'] });
+    },
+    onError: (error) => setMessage(error.message),
+  });
+  const createMatchMutation = useMutation({
+    mutationFn: () =>
+      createMatch(idToken ?? '', {
+        tournamentId: setupIds.tournamentId ?? '',
+        homeTeamId: setupIds.homeTeamId ?? '',
+        awayTeamId: setupIds.awayTeamId ?? '',
+        overs: Number(matchOvers),
+      }),
+    onSuccess: async () => {
+      setMessage('Match created.');
       await queryClient.invalidateQueries({ queryKey: ['admin', 'tournaments'] });
     },
     onError: (error) => setMessage(error.message),
@@ -151,6 +209,99 @@ export function AdminTab() {
           Create tournament
         </Button>
         <Text style={styles.authMessage}>{message}</Text>
+      </View>
+
+      <View style={styles.panel}>
+        <Text style={styles.sectionTitle}>Add team</Text>
+        <Text style={styles.helpText}>
+          Uses `EXPO_PUBLIC_DEMO_TOURNAMENT_ID` until tournament selection is built.
+        </Text>
+        <View style={styles.inputWrap}>
+          <Ionicons name="shield-outline" size={20} color="#64748b" />
+          <TextInput
+            onChangeText={setTeamName}
+            placeholder="Falcons"
+            placeholderTextColor="#94a3b8"
+            style={styles.input}
+            value={teamName}
+          />
+        </View>
+        <View style={styles.inputWrap}>
+          <Ionicons name="text-outline" size={20} color="#64748b" />
+          <TextInput
+            autoCapitalize="characters"
+            onChangeText={setTeamShortName}
+            placeholder="FAL"
+            placeholderTextColor="#94a3b8"
+            style={styles.input}
+            value={teamShortName}
+          />
+        </View>
+        <Button
+          borderRadius="$3"
+          disabled={!idToken || !setupIds.tournamentId || createTeamMutation.isPending}
+          onPress={() => createTeamMutation.mutate()}
+          theme="green"
+        >
+          Add team
+        </Button>
+      </View>
+
+      <View style={styles.panel}>
+        <Text style={styles.sectionTitle}>Add player</Text>
+        <Text style={styles.helpText}>
+          Uses `EXPO_PUBLIC_DEMO_TEAM_ID` until team selection is built.
+        </Text>
+        <View style={styles.inputWrap}>
+          <Ionicons name="person-add-outline" size={20} color="#64748b" />
+          <TextInput
+            onChangeText={setPlayerName}
+            placeholder="A. Rao"
+            placeholderTextColor="#94a3b8"
+            style={styles.input}
+            value={playerName}
+          />
+        </View>
+        <Button
+          borderRadius="$3"
+          disabled={!idToken || !setupIds.teamId || createPlayerMutation.isPending}
+          onPress={() => createPlayerMutation.mutate()}
+          theme="green"
+        >
+          Add player
+        </Button>
+      </View>
+
+      <View style={styles.panel}>
+        <Text style={styles.sectionTitle}>Create match</Text>
+        <Text style={styles.helpText}>
+          Uses demo tournament and team IDs until match setup selection is built.
+        </Text>
+        <View style={styles.inputWrap}>
+          <Ionicons name="time-outline" size={20} color="#64748b" />
+          <TextInput
+            keyboardType="number-pad"
+            onChangeText={setMatchOvers}
+            placeholder="15"
+            placeholderTextColor="#94a3b8"
+            style={styles.input}
+            value={matchOvers}
+          />
+        </View>
+        <Button
+          borderRadius="$3"
+          disabled={
+            !idToken ||
+            !setupIds.tournamentId ||
+            !setupIds.homeTeamId ||
+            !setupIds.awayTeamId ||
+            createMatchMutation.isPending
+          }
+          onPress={() => createMatchMutation.mutate()}
+          theme="green"
+        >
+          Create match
+        </Button>
       </View>
     </View>
   );

@@ -253,6 +253,10 @@ export const styles = StyleSheet.create({
     paddingVertical: 10,
     width: '22.6%',
   },
+  ballButtonActive: {
+    backgroundColor: '#dcfce7',
+    borderColor: '#0f766e',
+  },
   ballLabel: {
     color: '#0f172a',
     fontSize: 20,

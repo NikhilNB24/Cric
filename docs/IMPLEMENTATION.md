@@ -113,6 +113,9 @@ Why:
 - Kept mock viewer data as a fallback when the user is not signed in or no API data is available.
 - Wired the Admin tab to fetch user/tournament counts when signed in.
 - Added Admin tab mutations for approving a viewer and creating a tournament.
+- Added Admin tab mutations for creating teams, adding players, and creating matches behind temporary demo IDs.
+- Wired the Scorer tab ball buttons to ball submission and undo mutations.
+- Added temporary Expo public demo IDs for tournament, team, match setup, innings, striker, non-striker, and bowler so API calls can be tested once setup data exists.
 
 Why:
 
@@ -120,3 +123,5 @@ Why:
 - Typed helpers mirror the backend routes and reduce wiring mistakes as screens become interactive.
 - Viewer wiring is the lowest-risk first integration because it is read-only and matches the MVP manual-refresh model.
 - Admin wiring is the next-lowest-risk write path because user approval and tournament creation are simple, isolated setup actions.
+- Team/player/match creation now exists in the UI without requiring full picker screens, which keeps API wiring moving while preserving a clear path to replace demo IDs.
+- Scorer wiring starts behind explicit demo IDs so the UI can be exercised without pretending match/player selection is finished.
