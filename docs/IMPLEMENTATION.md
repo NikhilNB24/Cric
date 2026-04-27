@@ -28,3 +28,12 @@ This file tracks implementation work as it is added to the project.
 - Added `POST /users` for `SUPER_ADMIN` users to onboard approved phone numbers.
 - Added `PATCH /users/:id` for `SUPER_ADMIN` users to update name, role, or active status.
 - Added basic request validation for E.164 phone numbers, roles, statuses, and duplicate phone numbers.
+
+### Tournament Setup APIs
+
+- Added a tournaments backend module for MVP setup data.
+- Added `GET /tournaments`, `POST /tournaments`, and `GET /tournaments/:id`.
+- Added `GET /tournaments/:id/teams` and `POST /tournaments/:id/teams`.
+- Added `GET /teams/:id/players` and `POST /teams/:id/players`.
+- Restricted tournament/team/player creation to `SUPER_ADMIN` and `TOURNAMENT_ADMIN`.
+- Added validation for required names, optional E.164 player phone numbers, duplicate team/player names, and 11-player team maximum.

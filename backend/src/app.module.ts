@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { FirebaseModule } from './firebase/firebase.module';
+import { TournamentsModule } from './tournaments/tournaments.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { UsersModule } from './users/users.module';
     FirebaseModule,
     AuthModule,
     UsersModule,
+    TournamentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
