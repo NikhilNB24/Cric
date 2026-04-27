@@ -37,3 +37,12 @@ This file tracks implementation work as it is added to the project.
 - Added `GET /teams/:id/players` and `POST /teams/:id/players`.
 - Restricted tournament/team/player creation to `SUPER_ADMIN` and `TOURNAMENT_ADMIN`.
 - Added validation for required names, optional E.164 player phone numbers, duplicate team/player names, and 11-player team maximum.
+
+### Match Setup APIs
+
+- Added a matches backend module for match creation and lifecycle controls.
+- Added `GET /matches`, `GET /matches/:id`, and `POST /matches`.
+- Added `POST /matches/:id/start`, `/pause`, `/resume`, and `/complete`.
+- Restricted match creation to `SUPER_ADMIN` and `TOURNAMENT_ADMIN`.
+- Restricted match lifecycle actions to `SUPER_ADMIN`, `TOURNAMENT_ADMIN`, and `SCORER`.
+- Added validation for 3-15 overs, two different teams, same-tournament teams, and minimum 4 players per team.
