@@ -104,3 +104,19 @@ Why:
 - The tab shell gives each role a clear area without introducing navigation complexity before API wiring is complete.
 - Mocked data lets us verify layout, information density, and control placement before binding screens to live backend data.
 - Smaller components make the UI easier to wire to APIs, test, and evolve screen-by-screen.
+
+### Mobile API Client Layer
+
+- Added a shared API request helper that attaches Firebase bearer tokens and normalizes backend errors.
+- Added typed client helpers for auth, viewer, users, tournaments, teams, players, matches, innings, ball submission, and undo.
+- Wired the Live tab to TanStack Query calls for `/viewer/matches/live` and `/viewer/matches/recent`.
+- Kept mock viewer data as a fallback when the user is not signed in or no API data is available.
+- Wired the Admin tab to fetch user/tournament counts when signed in.
+- Added Admin tab mutations for approving a viewer and creating a tournament.
+
+Why:
+
+- A single API layer keeps screen components focused on UI state instead of repeated fetch boilerplate.
+- Typed helpers mirror the backend routes and reduce wiring mistakes as screens become interactive.
+- Viewer wiring is the lowest-risk first integration because it is read-only and matches the MVP manual-refresh model.
+- Admin wiring is the next-lowest-risk write path because user approval and tournament creation are simple, isolated setup actions.

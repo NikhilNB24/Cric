@@ -1,13 +1,84 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Text, View } from 'react-native';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { Text, TextInput, View } from 'react-native';
+import { Button } from 'tamagui';
 import { adminStats, type IconName } from '../constants/mock-data';
+import { createTournament, createUser, listTournaments, listUsers } from '../lib/api';
+import { useAuthStore } from '../stores/auth-store';
 import { styles } from './styles';
 
 export function AdminTab() {
+  const queryClient = useQueryClient();
+  const idToken = useAuthStore((state) => state.idToken);
+  const [userPhone, setUserPhone] = useState('+91');
+  const [userName, setUserName] = useState('');
+  const [tournamentName, setTournamentName] = useState('');
+  const [message, setMessage] = useState('Sign in as an admin to manage setup data.');
+  const usersQuery = useQuery({
+    queryKey: ['admin', 'users'],
+    queryFn: () => listUsers(idToken ?? ''),
+    enabled: Boolean(idToken),
+  });
+  const tournamentsQuery = useQuery({
+    queryKey: ['admin', 'tournaments'],
+    queryFn: () => listTournaments(idToken ?? ''),
+    enabled: Boolean(idToken),
+  });
+  const createUserMutation = useMutation({
+    mutationFn: () =>
+      createUser(idToken ?? '', {
+        phone: userPhone.trim(),
+        name: userName.trim() || null,
+        role: 'VIEWER',
+      }),
+    onSuccess: async () => {
+      setMessage('User approved as viewer.');
+      setUserPhone('+91');
+      setUserName('');
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+    },
+    onError: (error) => setMessage(error.message),
+  });
+  const createTournamentMutation = useMutation({
+    mutationFn: () =>
+      createTournament(idToken ?? '', {
+        name: tournamentName.trim(),
+      }),
+    onSuccess: async () => {
+      setMessage('Tournament created.');
+      setTournamentName('');
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'tournaments'] });
+    },
+    onError: (error) => setMessage(error.message),
+  });
+  const stats = [
+    {
+      ...adminStats[0],
+      value: String(usersQuery.data?.length ?? adminStats[0].value),
+    },
+    {
+      ...adminStats[1],
+      value: String(
+        tournamentsQuery.data?.reduce((total, tournament) => {
+          return total + (tournament._count?.teams ?? 0);
+        }, 0) ?? adminStats[1].value,
+      ),
+    },
+    {
+      ...adminStats[2],
+      value: String(
+        tournamentsQuery.data?.reduce((total, tournament) => {
+          return total + (tournament._count?.matches ?? 0);
+        }, 0) ?? adminStats[2].value,
+      ),
+    },
+  ];
+
   return (
     <View style={styles.stack}>
       <View style={styles.adminStats}>
-        {adminStats.map((item) => (
+        {stats.map((item) => (
           <View key={item.label} style={styles.statTile}>
             <Ionicons name={item.icon} size={22} color="#0f766e" />
             <Text style={styles.statValue}>{item.value}</Text>
@@ -22,6 +93,64 @@ export function AdminTab() {
         <SetupRow icon="shield-outline" title="Add teams" value="4-11 players each" />
         <SetupRow icon="calendar-outline" title="Create match" value="3-15 overs" />
         <SetupRow icon="person-add-outline" title="Approve scorer" value="Phone number role" />
+      </View>
+
+      <View style={styles.panel}>
+        <Text style={styles.sectionTitle}>Approve user</Text>
+        <Text style={styles.helpText}>Creates an active viewer account by phone number.</Text>
+        <View style={styles.inputWrap}>
+          <Ionicons name="call-outline" size={20} color="#64748b" />
+          <TextInput
+            keyboardType="phone-pad"
+            onChangeText={setUserPhone}
+            placeholder="+918310827940"
+            placeholderTextColor="#94a3b8"
+            style={styles.input}
+            value={userPhone}
+          />
+        </View>
+        <View style={styles.inputWrap}>
+          <Ionicons name="person-outline" size={20} color="#64748b" />
+          <TextInput
+            onChangeText={setUserName}
+            placeholder="Display name"
+            placeholderTextColor="#94a3b8"
+            style={styles.input}
+            value={userName}
+          />
+        </View>
+        <Button
+          borderRadius="$3"
+          disabled={!idToken || createUserMutation.isPending}
+          onPress={() => createUserMutation.mutate()}
+          theme="green"
+        >
+          Approve viewer
+        </Button>
+      </View>
+
+      <View style={styles.panel}>
+        <Text style={styles.sectionTitle}>Create tournament</Text>
+        <Text style={styles.helpText}>Start setup with a tournament container.</Text>
+        <View style={styles.inputWrap}>
+          <Ionicons name="trophy-outline" size={20} color="#64748b" />
+          <TextInput
+            onChangeText={setTournamentName}
+            placeholder="Sunday Premier League"
+            placeholderTextColor="#94a3b8"
+            style={styles.input}
+            value={tournamentName}
+          />
+        </View>
+        <Button
+          borderRadius="$3"
+          disabled={!idToken || createTournamentMutation.isPending}
+          onPress={() => createTournamentMutation.mutate()}
+          theme="green"
+        >
+          Create tournament
+        </Button>
+        <Text style={styles.authMessage}>{message}</Text>
       </View>
     </View>
   );
