@@ -150,6 +150,8 @@ export class ScoringService {
           throw new BadRequestException('Match is not in progress.');
         }
 
+        await this.validateBallPlayers(input, innings, tx);
+
         const sequence = await tx.ballEvent.count({
           where: {
             inningsId: input.inningsId,
@@ -216,11 +218,15 @@ export class ScoringService {
           },
         });
 
+        const finalInnings = await this.applyCompletionRules(
+          updatedInnings.id,
+          tx,
+        );
         await this.refreshSnapshot(input.inningsId, tx, 'inningsId');
 
         return {
           ballEvent,
-          innings: updatedInnings,
+          innings: finalInnings,
         };
       });
     } catch (error) {
@@ -253,6 +259,9 @@ export class ScoringService {
       const innings = await tx.innings.findUnique({
         where: {
           id: inningsId,
+        },
+        include: {
+          match: true,
         },
       });
 
@@ -293,6 +302,30 @@ export class ScoringService {
           },
         },
       });
+
+      if (innings.status === InningsStatus.COMPLETED) {
+        await tx.innings.update({
+          where: {
+            id: inningsId,
+          },
+          data: {
+            status: InningsStatus.IN_PROGRESS,
+            completedAt: null,
+          },
+        });
+      }
+
+      if (innings.match.status === MatchStatus.COMPLETED) {
+        await tx.match.update({
+          where: {
+            id: innings.matchId,
+          },
+          data: {
+            status: MatchStatus.IN_PROGRESS,
+            completedAt: null,
+          },
+        });
+      }
 
       await this.refreshSnapshot(inningsId, tx, 'inningsId');
 
@@ -348,6 +381,149 @@ export class ScoringService {
     if (input.isWicket && !input.dismissalType) {
       throw new BadRequestException('dismissalType is required for wickets.');
     }
+  }
+
+  private async validateBallPlayers(
+    input: SubmitBallInput,
+    innings: {
+      battingTeamId: string;
+      bowlingTeamId: string;
+    },
+    tx: Prisma.TransactionClient,
+  ) {
+    if (input.strikerId === input.nonStrikerId) {
+      throw new BadRequestException(
+        'Striker and non-striker must be different.',
+      );
+    }
+
+    const playerIds = [
+      input.strikerId,
+      input.nonStrikerId,
+      input.bowlerId,
+      input.playerOutId,
+    ].filter((id): id is string => Boolean(id));
+    const players = await tx.player.findMany({
+      where: {
+        id: {
+          in: playerIds,
+        },
+      },
+      select: {
+        id: true,
+        teamId: true,
+      },
+    });
+
+    if (players.length !== new Set(playerIds).size) {
+      throw new BadRequestException('All referenced players must exist.');
+    }
+
+    const playerById = new Map(players.map((player) => [player.id, player]));
+
+    if (playerById.get(input.strikerId)?.teamId !== innings.battingTeamId) {
+      throw new BadRequestException('Striker must belong to the batting team.');
+    }
+
+    if (playerById.get(input.nonStrikerId)?.teamId !== innings.battingTeamId) {
+      throw new BadRequestException(
+        'Non-striker must belong to the batting team.',
+      );
+    }
+
+    if (playerById.get(input.bowlerId)?.teamId !== innings.bowlingTeamId) {
+      throw new BadRequestException('Bowler must belong to the bowling team.');
+    }
+
+    if (
+      input.playerOutId &&
+      playerById.get(input.playerOutId)?.teamId !== innings.battingTeamId
+    ) {
+      throw new BadRequestException(
+        'Dismissed player must belong to the batting team.',
+      );
+    }
+  }
+
+  private async applyCompletionRules(
+    inningsId: string,
+    tx: Prisma.TransactionClient,
+  ) {
+    const innings = await tx.innings.findUniqueOrThrow({
+      where: {
+        id: inningsId,
+      },
+      include: {
+        match: true,
+      },
+    });
+    const battingPlayerCount = await tx.player.count({
+      where: {
+        teamId: innings.battingTeamId,
+      },
+    });
+    const allOutWickets = Math.max(battingPlayerCount - 1, 1);
+    const maxLegalBalls = innings.match.overs * 6;
+    const completedByOvers = innings.legalBalls >= maxLegalBalls;
+    const completedByAllOut = innings.wickets >= allOutWickets;
+    const completedByChase = await this.isChaseComplete(innings, tx);
+    const shouldComplete =
+      completedByOvers || completedByAllOut || completedByChase;
+
+    if (!shouldComplete) {
+      return innings;
+    }
+
+    const completedInnings = await tx.innings.update({
+      where: {
+        id: inningsId,
+      },
+      data: {
+        status: InningsStatus.COMPLETED,
+        completedAt: new Date(),
+      },
+    });
+
+    if (innings.inningsNumber === 2 || completedByChase) {
+      await tx.match.update({
+        where: {
+          id: innings.matchId,
+        },
+        data: {
+          status: MatchStatus.COMPLETED,
+          completedAt: new Date(),
+        },
+      });
+    }
+
+    return completedInnings;
+  }
+
+  private async isChaseComplete(
+    innings: { matchId: string; inningsNumber: number; runs: number },
+    tx: Prisma.TransactionClient,
+  ) {
+    if (innings.inningsNumber !== 2) {
+      return false;
+    }
+
+    const firstInnings = await tx.innings.findUnique({
+      where: {
+        matchId_inningsNumber: {
+          matchId: innings.matchId,
+          inningsNumber: 1,
+        },
+      },
+      select: {
+        runs: true,
+      },
+    });
+
+    if (!firstInnings) {
+      return false;
+    }
+
+    return innings.runs > firstInnings.runs;
   }
 
   private async refreshSnapshot(

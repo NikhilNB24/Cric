@@ -56,3 +56,21 @@ This file tracks implementation work as it is added to the project.
 - Added `POST /innings/:id/undo-last-ball` for simple current-innings correction.
 - Added innings total updates for runs, extras, wickets, and legal balls.
 - Added match score snapshot refreshes after innings start, ball submission, and undo.
+
+### Scoring Rule Hardening
+
+- Added validation that striker, non-striker, dismissed player, and bowler exist.
+- Added validation that batting players belong to the batting team and the bowler belongs to the bowling team.
+- Added validation that striker and non-striker must be different players.
+- Added automatic innings completion when max overs are reached or the batting team is all out.
+- Added automatic chase completion for the second innings when the target is passed.
+- Added match completion when the second innings completes.
+- Added undo behavior that reopens a completed innings or match when the last ball is removed.
+- Added focused scorer validation tests so invalid ball inputs fail before database writes.
+
+Why:
+
+- Scoring is the highest-risk workflow in the app because each ball changes match state, score snapshots, and completion rules.
+- Player/team validation prevents impossible scorecards, such as a bowler from the batting team or duplicate striker/non-striker.
+- Automatic innings and chase completion keeps match state consistent for viewers without requiring the scorer to manually end normal innings.
+- Undo reopening keeps scorer correction practical while preserving the remaining ball event history.
