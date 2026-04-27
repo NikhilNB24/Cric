@@ -20,3 +20,11 @@ This file tracks implementation work as it is added to the project.
 - Added a typed backend API helper for `GET /me`.
 - Added a Zustand auth store for the current CRIC user and Firebase ID token.
 - Added an OTP auth service boundary for sending/verifying Firebase phone OTP and exchanging the ID token with the backend.
+
+### Admin User Management
+
+- Added role metadata and a roles guard for protected backend routes.
+- Added `GET /users` for `SUPER_ADMIN` users to list local app users.
+- Added `POST /users` for `SUPER_ADMIN` users to onboard approved phone numbers.
+- Added `PATCH /users/:id` for `SUPER_ADMIN` users to update name, role, or active status.
+- Added basic request validation for E.164 phone numbers, roles, statuses, and duplicate phone numbers.
