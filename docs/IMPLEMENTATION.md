@@ -46,3 +46,13 @@ This file tracks implementation work as it is added to the project.
 - Restricted match creation to `SUPER_ADMIN` and `TOURNAMENT_ADMIN`.
 - Restricted match lifecycle actions to `SUPER_ADMIN`, `TOURNAMENT_ADMIN`, and `SCORER`.
 - Added validation for 3-15 overs, two different teams, same-tournament teams, and minimum 4 players per team.
+
+### Scoring Foundation APIs
+
+- Added a scoring backend module for innings setup and ball-by-ball scoring.
+- Added `GET /matches/:id/scorecard`.
+- Added `POST /matches/:id/innings` to start a match innings.
+- Added `POST /innings/:id/balls` to submit a scored delivery with idempotency protection.
+- Added `POST /innings/:id/undo-last-ball` for simple current-innings correction.
+- Added innings total updates for runs, extras, wickets, and legal balls.
+- Added match score snapshot refreshes after innings start, ball submission, and undo.
