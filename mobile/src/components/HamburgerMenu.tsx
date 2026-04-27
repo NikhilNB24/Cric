@@ -40,7 +40,11 @@ export function HamburgerMenu({
                   setActiveTab(tab.key);
                   setIsOpen(false);
                 }}
-                style={[styles.menuItem, isActive && styles.menuItemActive]}
+                style={({ pressed }) => [
+                  styles.menuItem,
+                  isActive && styles.menuItemActive,
+                  pressed && styles.appButtonPressed,
+                ]}
               >
                 <Ionicons name={tab.icon} size={19} color={isActive ? '#ffffff' : '#475569'} />
                 <Text style={[styles.menuItemText, isActive && styles.menuItemTextActive]}>

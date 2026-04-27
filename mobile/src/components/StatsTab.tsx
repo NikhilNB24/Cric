@@ -99,7 +99,11 @@ function PlayerResultRow({
   player: PlayerWithStats;
 }) {
   return (
-    <Pressable accessibilityRole="button" onPress={onPress} style={styles.matchRow}>
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.matchRow, pressed && styles.appButtonPressed]}
+    >
       <View style={styles.matchText}>
         <Text style={styles.matchTitle}>{player.name}</Text>
         <Text style={styles.matchMeta}>{player.team.name}</Text>

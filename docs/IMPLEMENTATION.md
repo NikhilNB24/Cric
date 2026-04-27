@@ -153,9 +153,17 @@ Why:
 - Added a reusable mobile `NumberSelector` for constrained numeric setup fields.
 - Replaced match overs text entry with a plus/minus selector.
 - Added a players-in-team selector to guide team roster setup.
+- Added scorer buttons for `3`, byes, and leg byes.
+- Made scorer ball tiles, menu rows, and player stat result rows show pressed feedback on click.
+- Converted the strike swap icon into a clickable control that swaps striker/non-striker state before submit.
+- Added a current match scorecard panel to the scorer screen.
+- Added typed mobile scorecard API support for `GET /matches/:id/scorecard`.
+- Added `EXPO_PUBLIC_DEMO_MATCH_ID` to mobile env examples for local scorecard testing.
+- Added a current-over history panel to the scorer screen.
 - Added a local development OTP bypass that accepts any entered OTP and signs in with a `dev-local:<phone>` token.
 - Added backend support for `dev-local:<phone>` bearer tokens outside production by resolving the phone number against active local users.
 - Expanded local CORS support to include Expo web at `http://localhost:19006`.
+- Merged default local CORS origins with `CORS_ORIGIN` values so `.env` does not accidentally remove Expo web.
 - Replaced the signed-in tab strip with a hamburger menu for Profile, Matches, Stats, Score, and Admin.
 - Added a mobile Stats screen that searches players by name or phone number and displays selected career stats.
 - Added `GET /player-stats/players?query=...` for player stat lookup.
@@ -181,7 +189,12 @@ Why:
 - Career stat reads give the app a stable API target for player profiles and leaderboards.
 - Capturing `fielderId` at scoring time gives the backend enough data to calculate fielding career stats from the ball-event ledger.
 - Numeric match and roster setup values should be selected from valid ranges instead of typed freely.
+- Scorers need one-tap access to all common delivery outcomes, including three runs and extra types.
+- Clickable scorer controls need visible feedback and real state changes so web testing matches mobile expectations.
+- Scorers should see the current innings score, extras, status, and recent balls while entering deliveries.
+- Current over history helps scorers verify the last few entries before submitting the next delivery.
 - Local browser/device testing should not be blocked on Firebase verifier setup while core workflows are still being built.
 - The bypass still requires the phone number to exist as an active backend user and is disabled when `NODE_ENV=production`.
 - Expo web runs from a different localhost origin than Metro native, so the backend must allow both local origins.
+- Keeping default local origins in code prevents stale local `.env` values from breaking browser testing.
 - Player stats should be discoverable by users without knowing internal player IDs.

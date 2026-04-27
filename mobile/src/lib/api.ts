@@ -53,6 +53,44 @@ export type ViewerMatch = {
   scoreSnapshot: ScoreSnapshot | null;
 };
 
+export type ScorecardBallEvent = {
+  id: string;
+  sequence: number;
+  overNumber: number;
+  ballInOver: number;
+  runsBat: number;
+  wides: number;
+  noBalls: number;
+  byes: number;
+  legByes: number;
+  penaltyRuns: number;
+  isLegalDelivery: boolean;
+  isWicket: boolean;
+  dismissalType: string | null;
+  striker: { id: string; name: string };
+  nonStriker: { id: string; name: string };
+  bowler: { id: string; name: string };
+  fielder?: { id: string; name: string } | null;
+  playerOut?: { id: string; name: string } | null;
+};
+
+export type ScorecardInnings = {
+  id: string;
+  inningsNumber: number;
+  runs: number;
+  wickets: number;
+  legalBalls: number;
+  extras: number;
+  status: string;
+  battingTeam: TeamSummary;
+  bowlingTeam: TeamSummary;
+  ballEvents: ScorecardBallEvent[];
+};
+
+export type MatchScorecard = ViewerMatch & {
+  innings: ScorecardInnings[];
+};
+
 export type CreateUserPayload = {
   phone: string;
   name?: string | null;
@@ -248,6 +286,10 @@ export function startInnings(idToken: string, matchId: string, body: StartInning
     method: 'POST',
     body,
   });
+}
+
+export function getMatchScorecard(idToken: string, matchId: string) {
+  return apiRequest<MatchScorecard>(`/matches/${matchId}/scorecard`, { idToken });
 }
 
 export function searchPlayerStats(idToken: string, query: string) {

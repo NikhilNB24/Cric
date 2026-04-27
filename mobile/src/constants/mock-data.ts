@@ -35,10 +35,13 @@ export const scorerBalls = [
   { label: '0', value: 'Dot' },
   { label: '1', value: 'Single' },
   { label: '2', value: 'Two' },
+  { label: '3', value: 'Three' },
   { label: '4', value: 'Four' },
   { label: '6', value: 'Six' },
   { label: 'Wd', value: 'Wide' },
   { label: 'Nb', value: 'No ball' },
+  { label: 'B', value: 'Bye' },
+  { label: 'LB', value: 'Leg bye' },
   { label: 'W', value: 'Wicket' },
 ];
 

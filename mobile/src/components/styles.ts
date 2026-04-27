@@ -124,6 +124,16 @@ export const styles = StyleSheet.create({
   appButtonWarningText: {
     color: '#111827',
   },
+  iconButton: {
+    alignItems: 'center',
+    backgroundColor: '#ecfdf5',
+    borderColor: '#99f6e4',
+    borderRadius: 8,
+    borderWidth: 1,
+    height: 42,
+    justifyContent: 'center',
+    width: 42,
+  },
   menuWrap: {
     gap: 10,
   },
@@ -334,6 +344,56 @@ export const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
+  scorecardInnings: {
+    borderTopColor: '#e2e8f0',
+    borderTopWidth: 1,
+    gap: 8,
+    paddingTop: 12,
+  },
+  scorecardScore: {
+    color: '#0f172a',
+    fontSize: 26,
+    fontWeight: '900',
+  },
+  recentBallsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  recentBallPill: {
+    alignItems: 'center',
+    backgroundColor: '#ecfdf5',
+    borderColor: '#99f6e4',
+    borderRadius: 999,
+    borderWidth: 1,
+    minWidth: 34,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
+  recentBallText: {
+    color: '#0f766e',
+    fontSize: 12,
+    fontWeight: '900',
+  },
+  overHistoryRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  overBallPill: {
+    alignItems: 'center',
+    backgroundColor: '#0f172a',
+    borderRadius: 999,
+    minHeight: 38,
+    minWidth: 38,
+    justifyContent: 'center',
+    paddingHorizontal: 10,
+  },
+  overBallText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '900',
+  },
   listPanel: {
     backgroundColor: '#ffffff',
     borderColor: '#e2e8f0',
@@ -412,7 +472,7 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     minHeight: 68,
     paddingVertical: 10,
-    width: '22.6%',
+    width: '30.8%',
   },
   ballButtonActive: {
     backgroundColor: '#dcfce7',
