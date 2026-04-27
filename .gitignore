@@ -1,0 +1,8 @@
+backend/.env
+mobile/.env
+*.local
+*.log
+node_modules/
+dist/
+.expo/
+.turbo/
