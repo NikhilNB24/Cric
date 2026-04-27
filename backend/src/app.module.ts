@@ -9,6 +9,7 @@ import { MatchesModule } from './matches/matches.module';
 import { ScoringModule } from './scoring/scoring.module';
 import { TournamentsModule } from './tournaments/tournaments.module';
 import { UsersModule } from './users/users.module';
+import { ViewerModule } from './viewer/viewer.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { UsersModule } from './users/users.module';
     TournamentsModule,
     MatchesModule,
     ScoringModule,
+    ViewerModule,
   ],
   controllers: [AppController],
   providers: [AppService],

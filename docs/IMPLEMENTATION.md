@@ -74,3 +74,17 @@ Why:
 - Player/team validation prevents impossible scorecards, such as a bowler from the batting team or duplicate striker/non-striker.
 - Automatic innings and chase completion keeps match state consistent for viewers without requiring the scorer to manually end normal innings.
 - Undo reopening keeps scorer correction practical while preserving the remaining ball event history.
+
+### Viewer Refresh APIs
+
+- Added a viewer backend module for lightweight refresh-based score screens.
+- Added `GET /viewer/matches/live` for in-progress and paused matches.
+- Added `GET /viewer/matches/recent` for the latest matches.
+- Added `GET /viewer/matches/:id/live-score` for a compact match score view.
+- Reused `match_score_snapshots` so viewer refreshes do not need to load every ball event.
+
+Why:
+
+- MVP viewers only need fresh data when opening or manually refreshing a screen, so snapshot-based reads keep the backend simple and cheap.
+- Separating viewer endpoints from scorer/admin setup endpoints makes it easier to keep payloads small and permissions clear.
+- The compact live-score endpoint gives mobile a stable target before automatic live updates are introduced.
